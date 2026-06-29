@@ -1,0 +1,10 @@
+{"level":"info","message":"Database connected","service":"yono-backend","timestamp":"2026-06-29T18:53:32.845Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"warn","message":"Redis error — cache operations will be skipped","service":"yono-backend","timestamp":"2026-06-29T18:53:32.850Z"}
+{"api":"http://localhost:5000/api/v1","docs":"http://localhost:5000/api-docs","env":"development","health":"http://localhost:5000/health","level":"info","message":"🚀 YONO Smart Companion Backend running","port":5000,"service":"yono-backend","timestamp":"2026-06-29T18:53:32.854Z"}
+{"error":"Connection is closed.","level":"warn","message":"Redis initial connect failed","service":"yono-backend","timestamp":"2026-06-29T18:53:32.855Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"warn","message":"Redis error — cache operations will be skipped","service":"yono-backend","timestamp":"2026-06-29T18:53:33.061Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"warn","message":"Redis error — cache operations will be skipped","service":"yono-backend","timestamp":"2026-06-29T18:53:33.470Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"warn","message":"Redis error — cache operations will be skipped","service":"yono-backend","timestamp":"2026-06-29T18:53:34.083Z"}
+{"level":"warn","message":"Redis unavailable — caching disabled, running in degraded mode","service":"yono-backend","timestamp":"2026-06-29T18:53:34.084Z"}
+{"level":"info","message":"Database connected","service":"yono-backend","timestamp":"2026-06-29T19:08:02.399Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"warn","message":"Redis error — cache operations will be skipped","service":"yono-backend","timestamp":"2026-06-29T19:08:02.404Z"}

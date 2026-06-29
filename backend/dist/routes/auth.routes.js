@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_controller_1 = require("../controllers/auth.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const validate_middleware_1 = require("../middlewares/validate.middleware");
+const rateLimiter_middleware_1 = require("../middlewares/rateLimiter.middleware");
+const audit_middleware_1 = require("../middlewares/audit.middleware");
+const auth_validator_1 = require("../validators/auth.validator");
+const router = (0, express_1.Router)();
+const ctrl = new auth_controller_1.AuthController();
+router.post('/register', (0, validate_middleware_1.validate)(auth_validator_1.registerSchema), ctrl.register.bind(ctrl));
+router.post('/login', rateLimiter_middleware_1.authRateLimiter, (0, validate_middleware_1.validate)(auth_validator_1.loginSchema), ctrl.login.bind(ctrl));
+router.post('/logout', auth_middleware_1.authenticate, ctrl.logout.bind(ctrl));
+router.post('/refresh', ctrl.refreshToken.bind(ctrl));
+router.post('/otp/send', rateLimiter_middleware_1.otpRateLimiter, (0, validate_middleware_1.validate)(auth_validator_1.sendOtpSchema), ctrl.sendOtp.bind(ctrl));
+router.post('/otp/verify', (0, validate_middleware_1.validate)(auth_validator_1.verifyOtpSchema), ctrl.verifyOtp.bind(ctrl));
+router.get('/profile', auth_middleware_1.authenticate, ctrl.getProfile.bind(ctrl));
+router.patch('/profile', auth_middleware_1.authenticate, (0, audit_middleware_1.auditLog)('PROFILE_UPDATED'), ctrl.updateProfile.bind(ctrl));
+router.post('/change-password', auth_middleware_1.authenticate, (0, validate_middleware_1.validate)(auth_validator_1.changePasswordSchema), ctrl.changePassword.bind(ctrl));
+exports.default = router;
+//# sourceMappingURL=auth.routes.js.map

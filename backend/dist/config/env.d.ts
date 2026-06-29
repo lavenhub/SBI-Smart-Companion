@@ -1,0 +1,37 @@
+export declare const env: {
+    NODE_ENV: "development" | "production" | "test";
+    PORT: number;
+    API_PREFIX: string;
+    DATABASE_URL: string;
+    JWT_ACCESS_SECRET: string;
+    JWT_REFRESH_SECRET: string;
+    JWT_ACCESS_EXPIRES_IN: string;
+    JWT_REFRESH_EXPIRES_IN: string;
+    REDIS_HOST: string;
+    REDIS_PORT: number;
+    REDIS_TTL_SECONDS: number;
+    CORS_ORIGIN: string;
+    RATE_LIMIT_WINDOW_MS: number;
+    RATE_LIMIT_MAX: number;
+    AUTH_RATE_LIMIT_MAX: number;
+    STORAGE_PROVIDER: "local" | "s3";
+    UPLOAD_DIR: string;
+    MAX_FILE_SIZE_MB: number;
+    SMTP_HOST: string;
+    SMTP_PORT: number;
+    SMTP_USER: string;
+    SMTP_PASS: string;
+    SMTP_FROM: string;
+    LOG_LEVEL: "error" | "warn" | "info" | "debug";
+    LOG_DIR: string;
+    BCRYPT_ROUNDS: number;
+    OTP_EXPIRY_MINUTES: number;
+    OTP_LENGTH: number;
+    DRAFT_AUTO_SAVE_INTERVAL_SECONDS: number;
+    DRAFT_EXPIRY_DAYS: number;
+    DEFAULT_PAGE_SIZE: number;
+    MAX_PAGE_SIZE: number;
+    REDIS_PASSWORD?: string | undefined;
+};
+export type Env = typeof env;
+//# sourceMappingURL=env.d.ts.map

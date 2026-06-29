@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const dashboard_controller_1 = require("../controllers/dashboard.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const validate_middleware_1 = require("../middlewares/validate.middleware");
+const dashboard_validator_1 = require("../validators/dashboard.validator");
+const router = (0, express_1.Router)();
+const ctrl = new dashboard_controller_1.DashboardController();
+router.use(auth_middleware_1.authenticate);
+router.get('/', ctrl.getSummary.bind(ctrl));
+router.get('/preferences', ctrl.getPreferences.bind(ctrl));
+router.patch('/preferences', (0, validate_middleware_1.validate)(dashboard_validator_1.updatePreferencesSchema), ctrl.updatePreferences.bind(ctrl));
+router.get('/quick-actions', ctrl.getQuickActions.bind(ctrl));
+router.post('/quick-actions/pin', (0, validate_middleware_1.validate)(dashboard_validator_1.pinActionSchema), ctrl.pinAction.bind(ctrl));
+router.post('/activity', (0, validate_middleware_1.validate)(dashboard_validator_1.trackActivitySchema), ctrl.trackActivity.bind(ctrl));
+router.get('/recent-activities', ctrl.getRecentActivities.bind(ctrl));
+router.get('/insights/spending', ctrl.getSpendingInsights.bind(ctrl));
+exports.default = router;
+//# sourceMappingURL=dashboard.routes.js.map

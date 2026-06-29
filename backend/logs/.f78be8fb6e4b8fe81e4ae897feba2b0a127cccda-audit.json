@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\lavis\\Desktop\\SBI_hacha\\backend\\logs\\.f78be8fb6e4b8fe81e4ae897feba2b0a127cccda-audit.json",
+    "files": [
+        {
+            "date": 1782742962800,
+            "name": "C:\\Users\\lavis\\Desktop\\SBI_hacha\\backend\\logs\\app-2026-06-29.log",
+            "hash": "94e5e53da6eff43dd1157d09dcc03b7b9603b7a3633ee4ae1a5c89f600e94217"
+        },
+        {
+            "date": 1782759212308,
+            "name": "C:\\Users\\lavis\\Desktop\\SBI_hacha\\backend\\logs\\app-2026-06-30.log",
+            "hash": "536c2a67d45a18d9a1dd3e9a6975b83e65bb37480a6bdff78d62f6038bb785c7"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const account_controller_1 = require("../controllers/account.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const validate_middleware_1 = require("../middlewares/validate.middleware");
+const account_validator_1 = require("../validators/account.validator");
+const router = (0, express_1.Router)();
+const ctrl = new account_controller_1.AccountController();
+const a = auth_middleware_1.authenticate;
+router.use(a);
+router.get('/', ctrl.getAll.bind(ctrl));
+router.get('/balance', ctrl.getTotalBalance.bind(ctrl));
+router.get('/beneficiaries', ctrl.getBeneficiaries.bind(ctrl));
+router.post('/beneficiaries', (0, validate_middleware_1.validate)(account_validator_1.createBeneficiarySchema), ctrl.createBeneficiary.bind(ctrl));
+router.patch('/beneficiaries/:id', ctrl.updateBeneficiary.bind(ctrl));
+router.delete('/beneficiaries/:id', ctrl.deleteBeneficiary.bind(ctrl));
+router.get('/:id', (0, validate_middleware_1.validate)(account_validator_1.accountIdSchema), ctrl.getById.bind(ctrl));
+exports.default = router;
+//# sourceMappingURL=account.routes.js.map

@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const vault_controller_1 = require("../controllers/vault.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const upload_middleware_1 = require("../middlewares/upload.middleware");
+const validate_middleware_1 = require("../middlewares/validate.middleware");
+const audit_middleware_1 = require("../middlewares/audit.middleware");
+const vault_validator_1 = require("../validators/vault.validator");
+const router = (0, express_1.Router)();
+const ctrl = new vault_controller_1.VaultController();
+router.use(auth_middleware_1.authenticate);
+router.get('/', (0, audit_middleware_1.auditLog)('VAULT_ACCESSED'), ctrl.getFolderTree.bind(ctrl));
+router.post('/folders', (0, validate_middleware_1.validate)(vault_validator_1.createFolderSchema), ctrl.createFolder.bind(ctrl));
+router.patch('/folders/:id', (0, validate_middleware_1.validate)(vault_validator_1.folderIdSchema), ctrl.updateFolder.bind(ctrl));
+router.delete('/folders/:id', (0, validate_middleware_1.validate)(vault_validator_1.folderIdSchema), ctrl.deleteFolder.bind(ctrl));
+router.get('/documents', ctrl.getDocuments.bind(ctrl));
+router.get('/documents/search', ctrl.searchDocuments.bind(ctrl));
+router.post('/documents/upload', upload_middleware_1.uploadSingle, ctrl.uploadDocument.bind(ctrl));
+router.get('/documents/:id', (0, validate_middleware_1.validate)(vault_validator_1.documentIdSchema), (0, audit_middleware_1.auditLog)('DOCUMENT_ACCESSED'), ctrl.getDocument.bind(ctrl));
+router.get('/documents/:id/download', (0, validate_middleware_1.validate)(vault_validator_1.documentIdSchema), (0, audit_middleware_1.auditLog)('DOCUMENT_DOWNLOADED'), ctrl.downloadDocument.bind(ctrl));
+router.delete('/documents/:id', (0, validate_middleware_1.validate)(vault_validator_1.documentIdSchema), ctrl.deleteDocument.bind(ctrl));
+exports.default = router;
+//# sourceMappingURL=vault.routes.js.map

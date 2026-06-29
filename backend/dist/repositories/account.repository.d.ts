@@ -1,0 +1,80 @@
+import { Prisma, Account } from '@prisma/client';
+export declare class AccountRepository {
+    findById(id: string, userId?: string): Promise<Account | null>;
+    findByNumber(accountNumber: string): Promise<Account | null>;
+    findByUserId(userId: string): Promise<Account[]>;
+    create(data: Prisma.AccountCreateInput): Promise<Account>;
+    update(id: string, data: Prisma.AccountUpdateInput): Promise<Account>;
+    updateBalance(id: string, amount: number, operation: 'increment' | 'decrement'): Promise<Account>;
+    findBeneficiaries(userId: string): Promise<{
+        name: string;
+        id: string;
+        userId: string;
+        accountId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        accountNumber: string | null;
+        ifscCode: string | null;
+        phone: string | null;
+        nickname: string | null;
+        bankName: string | null;
+        upiId: string | null;
+        isFavorite: boolean;
+        transferLimit: number;
+        verifiedAt: Date | null;
+    }[]>;
+    findBeneficiaryById(id: string, userId: string): Promise<{
+        name: string;
+        id: string;
+        userId: string;
+        accountId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        accountNumber: string | null;
+        ifscCode: string | null;
+        phone: string | null;
+        nickname: string | null;
+        bankName: string | null;
+        upiId: string | null;
+        isFavorite: boolean;
+        transferLimit: number;
+        verifiedAt: Date | null;
+    } | null>;
+    createBeneficiary(data: Prisma.BeneficiaryCreateInput): Promise<{
+        name: string;
+        id: string;
+        userId: string;
+        accountId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        accountNumber: string | null;
+        ifscCode: string | null;
+        phone: string | null;
+        nickname: string | null;
+        bankName: string | null;
+        upiId: string | null;
+        isFavorite: boolean;
+        transferLimit: number;
+        verifiedAt: Date | null;
+    }>;
+    updateBeneficiary(id: string, data: Prisma.BeneficiaryUpdateInput): Promise<{
+        name: string;
+        id: string;
+        userId: string;
+        accountId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        accountNumber: string | null;
+        ifscCode: string | null;
+        phone: string | null;
+        nickname: string | null;
+        bankName: string | null;
+        upiId: string | null;
+        isFavorite: boolean;
+        transferLimit: number;
+        verifiedAt: Date | null;
+    }>;
+    deleteBeneficiary(id: string, userId: string): Promise<void>;
+    getTotalBalance(userId: string): Promise<number>;
+}
+//# sourceMappingURL=account.repository.d.ts.map

@@ -1,0 +1,889 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// YONO Smart Companion — Prisma Schema (SQLite)
+// ═══════════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Note: SQLite does not support enums or @db.* type annotations.
+//     All enums become String. All Decimal become Float. All String[] become String (JSON).
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(uuid())
+  customerId        String    @unique @default(uuid())
+  firstName         String
+  lastName          String
+  email             String    @unique
+  phone             String    @unique
+  passwordHash      String
+  mpin              String?
+  role              String    @default("CUSTOMER")
+  kycStatus         String    @default("PENDING")
+  isActive          Boolean   @default(true)
+  isPhoneVerified   Boolean   @default(false)
+  isEmailVerified   Boolean   @default(false)
+  pan               String?
+  aadhar            String?
+  dateOfBirth       DateTime?
+  gender            String?
+  occupation        String?
+  annualIncome      Float?
+  avatarUrl         String?
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  state             String?
+  pincode           String?
+  country           String    @default("India")
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  accounts           Account[]
+  cards              Card[]
+  loans              Loan[]
+  beneficiaries      Beneficiary[]
+  transactions       Transaction[]
+  documents          Document[]
+  vaultFolders       VaultFolder[]
+  applications       Application[]
+  notifications      Notification[]
+  searchHistory      SearchHistory[]
+  dashboardPref      DashboardPreference?
+  quickActions       QuickAction[]
+  bills              Bill[]
+  sessions           Session[]
+  refreshTokens      RefreshToken[]
+  userDevices        UserDevice[]
+  auditLogs          AuditLog[]
+  rewardPoints       RewardPoint[]
+  recentActivities   RecentActivity[]
+  insurancePolicies  InsurancePolicy[]
+  fixedDeposits      FixedDeposit[]
+  recurringDeposits  RecurringDeposit[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([customerId])
+  @@map("users")
+}
+
+// ─── Account ─────────────────────────────────────────────────────────────────
+
+model Account {
+  id               String    @id @default(uuid())
+  userId           String
+  accountNumber    String    @unique
+  accountType      String
+  status           String    @default("ACTIVE")
+  balance          Float     @default(0)
+  availableBalance Float     @default(0)
+  minBalance       Float     @default(0)
+  interestRate     Float     @default(0)
+  branch           String
+  ifscCode         String
+  micrCode         String?
+  nomineeName      String?
+  nomineeRelation  String?
+  isJointAccount   Boolean   @default(false)
+  openedAt         DateTime  @default(now())
+  closedAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  cards         Card[]
+  beneficiaries Beneficiary[] @relation("BeneficiaryAccount")
+
+  @@index([userId])
+  @@index([accountNumber])
+  @@map("accounts")
+}
+
+// ─── Session & Auth ──────────────────────────────────────────────────────────
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  deviceId  String?
+  ipAddress String?
+  userAgent String?
+  isActive  Boolean  @default(true)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  deviceId  String?
+  ipAddress String?
+  isRevoked Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model UserDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  deviceId   String   @unique
+  deviceName String?
+  deviceType String?
+  platform   String?
+  pushToken  String?
+  isTrusted  Boolean  @default(false)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_devices")
+}
+
+model OtpRecord {
+  id         String   @id @default(uuid())
+  identifier String
+  otpHash    String
+  purpose    String
+  attempts   Int      @default(0)
+  isUsed     Boolean  @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, purpose])
+  @@map("otp_records")
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
+
+model Card {
+  id                   String    @id @default(uuid())
+  userId               String
+  accountId            String
+  cardNumber           String    @unique
+  maskedNumber         String
+  cardType             String
+  network              String
+  status               String    @default("ACTIVE")
+  nameOnCard           String
+  expiryMonth          Int
+  expiryYear           Int
+  cvvHash              String
+  creditLimit          Float?
+  availableCredit      Float?
+  cashLimit            Float?
+  dailyAtmLimit        Float     @default(40000)
+  dailyPosLimit        Float     @default(100000)
+  internationalEnabled Boolean   @default(false)
+  contactlessEnabled   Boolean   @default(true)
+  onlineEnabled        Boolean   @default(true)
+  blockedAt            DateTime?
+  blockedReason        String?
+  issuedAt             DateTime  @default(now())
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account      Account       @relation(fields: [accountId], references: [id])
+  transactions Transaction[]
+
+  @@index([userId])
+  @@map("cards")
+}
+
+// ─── Beneficiary ─────────────────────────────────────────────────────────────
+
+model Beneficiary {
+  id            String    @id @default(uuid())
+  userId        String
+  accountId     String?
+  name          String
+  nickname      String?
+  bankName      String?
+  accountNumber String?
+  ifscCode      String?
+  upiId         String?
+  phone         String?
+  isFavorite    Boolean   @default(false)
+  transferLimit Float     @default(500000)
+  verifiedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account      Account?      @relation("BeneficiaryAccount", fields: [accountId], references: [id])
+  transactions Transaction[]
+
+  @@index([userId])
+  @@map("beneficiaries")
+}
+
+// ─── Merchant ─────────────────────────────────────────────────────────────────
+
+model MerchantCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String   @unique
+  icon      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  merchants Merchant[]
+
+  @@map("merchant_categories")
+}
+
+model Merchant {
+  id           String   @id @default(uuid())
+  categoryId   String
+  name         String
+  mcc          String?
+  website      String?
+  phone        String?
+  supportEmail String?
+  supportPhone String?
+  logoUrl      String?
+  address      String?
+  city         String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category     MerchantCategory @relation(fields: [categoryId], references: [id])
+  transactions Transaction[]
+  receipts     Receipt[]
+
+  @@index([name])
+  @@map("merchants")
+}
+
+// ─── Transaction ─────────────────────────────────────────────────────────────
+
+model Transaction {
+  id            String    @id @default(uuid())
+  userId        String
+  accountId     String
+  cardId        String?
+  beneficiaryId String?
+  merchantId    String?
+  referenceId   String    @unique
+  type          String
+  mode          String
+  status        String    @default("PENDING")
+  amount        Float
+  currency      String    @default("INR")
+  charges       Float     @default(0)
+  tax           Float     @default(0)
+  netAmount     Float
+  balanceBefore Float
+  balanceAfter  Float
+  description   String?
+  remarks       String?
+  category      String?
+  subCategory   String?
+  senderUpi     String?
+  receiverUpi   String?
+  bankRef       String?
+  ipAddress     String?
+  deviceId      String?
+  location      String?
+  failureReason String?
+  processedAt   DateTime?
+  reversedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id])
+  account         Account          @relation(fields: [accountId], references: [id])
+  card            Card?            @relation(fields: [cardId], references: [id])
+  beneficiary     Beneficiary?     @relation(fields: [beneficiaryId], references: [id])
+  merchant        Merchant?        @relation(fields: [merchantId], references: [id])
+  receipt         Receipt?
+  purchaseFolders PurchaseHistory[]
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([referenceId])
+  @@index([createdAt])
+  @@index([status])
+  @@map("transactions")
+}
+
+// ─── Loans ───────────────────────────────────────────────────────────────────
+
+model Loan {
+  id                String    @id @default(uuid())
+  userId            String
+  loanAccountNumber String    @unique
+  loanType          String
+  status            String    @default("APPLIED")
+  principalAmount   Float
+  outstandingAmount Float
+  disbursedAmount   Float?
+  interestRate      Float
+  processingFee     Float     @default(0)
+  emi               Float
+  tenure            Int
+  remainingTenure   Int
+  emiDay            Int       @default(5)
+  nextEmiDate       DateTime?
+  disbursedAt       DateTime?
+  closedAt          DateTime?
+  propertyAddress   String?
+  vehicleNumber     String?
+  purposeOfLoan     String?
+  collateral        String?
+  branchCode        String?
+  sanctionedBy      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user        User          @relation(fields: [userId], references: [id])
+  emiSchedule EmiSchedule[]
+  documents   Document[]    @relation("LoanDocuments")
+
+  @@index([userId])
+  @@map("loans")
+}
+
+model EmiSchedule {
+  id            String    @id @default(uuid())
+  loanId        String
+  installmentNo Int
+  dueDate       DateTime
+  principal     Float
+  interest      Float
+  totalEmi      Float
+  paidAmount    Float     @default(0)
+  paidAt        DateTime?
+  status        String    @default("PENDING")
+  createdAt     DateTime  @default(now())
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@index([loanId])
+  @@map("emi_schedules")
+}
+
+// ─── Fixed & Recurring Deposits ──────────────────────────────────────────────
+
+model FixedDeposit {
+  id              String    @id @default(uuid())
+  userId          String
+  fdAccountNumber String    @unique
+  principal       Float
+  interestRate    Float
+  tenureDays      Int
+  maturityAmount  Float
+  maturityDate    DateTime
+  status          String    @default("ACTIVE")
+  isAutoRenew     Boolean   @default(false)
+  isTaxSaver      Boolean   @default(false)
+  nomineeName     String?
+  startDate       DateTime  @default(now())
+  closedAt        DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id])
+  documents Document[]
+
+  @@index([userId])
+  @@map("fixed_deposits")
+}
+
+model RecurringDeposit {
+  id                 String    @id @default(uuid())
+  userId             String
+  rdAccountNumber    String    @unique
+  monthlyInstallment Float
+  interestRate       Float
+  tenureMonths       Int
+  completedMonths    Int       @default(0)
+  maturityAmount     Float
+  maturityDate       DateTime
+  status             String    @default("ACTIVE")
+  missedInstallments Int       @default(0)
+  startDate          DateTime  @default(now())
+  closedAt           DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("recurring_deposits")
+}
+
+// ─── Insurance ───────────────────────────────────────────────────────────────
+
+model InsurancePolicy {
+  id               String    @id @default(uuid())
+  userId           String
+  policyNumber     String    @unique
+  insuranceType    String
+  status           String    @default("ACTIVE")
+  provider         String
+  productName      String
+  sumAssured       Float
+  premium          Float
+  premiumFrequency String    @default("ANNUAL")
+  nextDueDate      DateTime?
+  maturityDate     DateTime?
+  coverageDetails  String?
+  nominees         String?
+  policyDocument   String?
+  startDate        DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id])
+  documents Document[]
+
+  @@index([userId])
+  @@map("insurance_policies")
+}
+
+// ─── Bills ────────────────────────────────────────────────────────────────────
+
+model Bill {
+  id             String    @id @default(uuid())
+  userId         String
+  name           String
+  description    String?
+  amount         Float
+  dueDate        DateTime
+  category       String
+  status         String    @default("PENDING")
+  isRecurring    Boolean   @default(false)
+  recurrenceDays Int?
+  billerCode     String?
+  consumerNo     String?
+  paidAt         DateTime?
+  paidAmount     Float?
+  transactionId  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([dueDate])
+  @@map("bills")
+}
+
+model Subscription {
+  id              String   @id @default(uuid())
+  userId          String?
+  name            String
+  description     String?
+  amount          Float
+  billingCycle    String
+  nextBillingDate DateTime
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@map("subscriptions")
+}
+
+// ─── Smart Vault ─────────────────────────────────────────────────────────────
+
+model VaultFolder {
+  id          String    @id @default(uuid())
+  userId      String
+  parentId    String?
+  name        String
+  slug        String
+  description String?
+  color       String?
+  icon        String?
+  isSystem    Boolean   @default(false)
+  isShared    Boolean   @default(false)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    VaultFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children  VaultFolder[] @relation("FolderHierarchy")
+  documents Document[]
+
+  @@unique([userId, slug, parentId])
+  @@index([userId])
+  @@map("vault_folders")
+}
+
+model Document {
+  id                String    @id @default(uuid())
+  userId            String
+  folderId          String?
+  loanId            String?
+  insurancePolicyId String?
+  fixedDepositId    String?
+  category          String
+  status            String    @default("ACTIVE")
+  name              String
+  description       String?
+  fileKey           String
+  fileUrl           String?
+  fileName          String
+  mimeType          String
+  fileSizeBytes     Int
+  checksum          String?
+  tags              String    @default("[]")
+  metadata          String?
+  isAutoGenerated   Boolean   @default(false)
+  downloadCount     Int       @default(0)
+  lastAccessedAt    DateTime?
+  expiresAt         DateTime?
+  version           Int       @default(1)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder          VaultFolder?     @relation(fields: [folderId], references: [id])
+  loan            Loan?            @relation("LoanDocuments", fields: [loanId], references: [id])
+  insurancePolicy InsurancePolicy? @relation(fields: [insurancePolicyId], references: [id])
+  fixedDeposit    FixedDeposit?    @relation(fields: [fixedDepositId], references: [id])
+
+  @@index([userId])
+  @@index([folderId])
+  @@index([category])
+  @@map("documents")
+}
+
+model Receipt {
+  id             String    @id @default(uuid())
+  transactionId  String    @unique
+  merchantId     String?
+  userId         String?
+  amount         Float
+  currency       String    @default("INR")
+  items          String?
+  taxAmount      Float?
+  discountAmount Float?
+  receiptNumber  String?
+  receiptDate    DateTime  @default(now())
+  documentId     String?
+  createdAt      DateTime  @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  merchant    Merchant?   @relation(fields: [merchantId], references: [id])
+  invoices    Invoice[]
+  warranties  Warranty[]
+
+  @@map("receipts")
+}
+
+model Invoice {
+  id            String    @id @default(uuid())
+  receiptId     String
+  invoiceNumber String
+  issuedAt      DateTime  @default(now())
+  dueDate       DateTime?
+  lineItems     String
+  subTotal      Float
+  gst           Float     @default(0)
+  total         Float
+  documentId    String?
+  createdAt     DateTime  @default(now())
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model Warranty {
+  id             String   @id @default(uuid())
+  receiptId      String
+  productName    String
+  serialNumber   String?
+  warrantyPeriod String
+  warrantyStart  DateTime @default(now())
+  warrantyEnd    DateTime
+  supportPhone   String?
+  supportEmail   String?
+  supportUrl     String?
+  documentId     String?
+  createdAt      DateTime @default(now())
+
+  receipt Receipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  @@map("warranties")
+}
+
+model PurchaseHistory {
+  id            String   @id @default(uuid())
+  transactionId String
+  folderName    String
+  productName   String
+  category      String
+  amount        Float
+  createdAt     DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@map("purchase_history")
+}
+
+// ─── Applications ─────────────────────────────────────────────────────────────
+
+model Application {
+  id                String    @id @default(uuid())
+  userId            String
+  applicationType   String
+  status            String    @default("DRAFT")
+  title             String
+  currentStep       Int       @default(0)
+  totalSteps        Int
+  completionPercent Int       @default(0)
+  estimatedMinutes  Int       @default(10)
+  formData          String    @default("{}")
+  completedFields   String    @default("[]")
+  missingFields     String    @default("[]")
+  steps             String
+  submittedAt       DateTime?
+  approvedAt        DateTime?
+  rejectedAt        DateTime?
+  rejectionReason   String?
+  expiresAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user   User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drafts ApplicationDraft[]
+
+  @@index([userId])
+  @@index([applicationType])
+  @@index([status])
+  @@map("applications")
+}
+
+model ApplicationDraft {
+  id            String   @id @default(uuid())
+  applicationId String
+  stepIndex     Int
+  stepName      String
+  fieldData     String
+  savedAt       DateTime @default(now())
+  version       Int      @default(1)
+  isLatest      Boolean  @default(true)
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@map("application_drafts")
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+
+model SearchHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  query           String
+  normalizedQuery String
+  resultCount     Int      @default(0)
+  clickedId       String?
+  clickedType     String?
+  sessionId       String?
+  ipAddress       String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("search_history")
+}
+
+model SearchIndex {
+  id            String   @id @default(uuid())
+  featureKey    String   @unique
+  title         String
+  description   String?
+  category      String
+  module        String
+  route         String
+  icon          String?
+  keywords      String   @default("[]")
+  aliases       String   @default("[]")
+  synonyms      String   @default("[]")
+  estimatedTime String?
+  shortcut      String?
+  popularity    Int      @default(0)
+  isActive      Boolean  @default(true)
+  requiredRole  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([featureKey])
+  @@map("search_index")
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
+model DashboardPreference {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  layout            String   @default("[]")
+  pinnedWidgets     String   @default("[]")
+  hiddenWidgets     String   @default("[]")
+  quickActionIds    String   @default("[]")
+  colorScheme       String   @default("sbi-blue")
+  compactMode       Boolean  @default(false)
+  showBalanceOnLoad Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("dashboard_preferences")
+}
+
+model QuickAction {
+  id         String    @id @default(uuid())
+  userId     String
+  featureKey String
+  label      String
+  route      String
+  icon       String
+  usageCount Int       @default(0)
+  lastUsedAt DateTime?
+  isPinned   Boolean   @default(false)
+  sortOrder  Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, featureKey])
+  @@index([userId])
+  @@map("quick_actions")
+}
+
+model RecentActivity {
+  id         String   @id @default(uuid())
+  userId     String
+  featureKey String
+  label      String
+  route      String
+  icon       String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("recent_activities")
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+model Notification {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String
+  channel       String    @default("IN_APP")
+  title         String
+  body          String
+  data          String?
+  imageUrl      String?
+  actionUrl     String?
+  isRead        Boolean   @default(false)
+  readAt        DateTime?
+  isSent        Boolean   @default(false)
+  sentAt        DateTime?
+  failureReason String?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─── Rewards ──────────────────────────────────────────────────────────────────
+
+model RewardPoint {
+  id            String    @id @default(uuid())
+  userId        String
+  type          String
+  points        Int
+  description   String
+  referenceId   String?
+  referenceType String?
+  balance       Int
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("reward_points")
+}
+
+// ─── Audit ────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String
+  entityType  String?
+  entityId    String?
+  description String
+  ipAddress   String?
+  userAgent   String?
+  deviceId    String?
+  metadata    String?
+  severity    String   @default("INFO")
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SupportCenter {
+  id          String   @id @default(uuid())
+  title       String
+  category    String
+  content     String
+  tags        String   @default("[]")
+  isPublished Boolean  @default(true)
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("support_centers")
+}
