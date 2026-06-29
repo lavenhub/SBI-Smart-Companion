@@ -30,7 +30,8 @@ The project is split into a frontend and a backend folder. The voice agent and t
 3. Run the development server:
    npm run dev
 
-4. Open http://localhost:3000 in Google Chrome or Microsoft Edge (Voice features require a Chromium-based browser).
+4. Open the application in Google Chrome or Microsoft Edge (Voice features require a Chromium-based browser).
+   Note: Once deployed, you will use the live Vercel URL instead of localhost.
 
 ## Deployment
 
