@@ -1,0 +1,9 @@
+Name: Lavish Patil
+DOB: 14-May-1992
+PAN: ABCDE1234F
+Aadhaar: 9876 5432 1098
+Mobile: 9876543210
+Employer: Infosys Ltd.
+Employment Type: Salaried
+Monthly Income: ₹85,000
+Work Experience: 6 Years
