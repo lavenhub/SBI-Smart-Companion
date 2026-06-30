@@ -1,5 +1,7 @@
 # SBI Smart Companion
 
+![SBI Smart Companion Dashboard](./screenshot.png)
+
 A Next.js based web application for the SBI Hackathon. It features an AI-powered voice assistant capable of navigating the banking dashboard, managing personal documents in a Smart Vault, forecasting affordability, and auto-filling loan applications using voice commands.
 
 ## Features
